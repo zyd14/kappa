@@ -1,4 +1,4 @@
-@HD		VN:1.0			SO:coordinate
-@SQ		SN:chr1 		LN:249250621
-@SQ     SN:chr10        LN:135534747
-@SQ     SN:chr11        LN:135006516
+@HD		VN:1.0			SO:coordinate		SR:
+@SQ		SN:chr10	LN:249250621		SR:
+@SQ		SN:chr10	LN:135534747		SR:
+Meh!!!

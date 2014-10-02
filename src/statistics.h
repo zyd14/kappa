@@ -1,29 +1,20 @@
 #include <stdlib.h>
 #include <string.h>
 
-int min (int * a) {
-	int min = a[0];
-	int i = 0;
-	while (&a[i] != NULL) {
-		if (a[i] < min) {
-			min = a[i];
-		}
-		i = i + 1;
-	}
-	return min;
-}
+double average (int * a);
+char   charAt (char * str, int index);
+_Bool  containStr (char * str, char * tar);
+int    indexAfter (char * str, char c, int rep);
+int    indexOf (char * str, char c);
+int    indexOfStr (char * str, char * cmp);
+int    max (int * a);
+int    min (int * a);
+int    parseInt (char * str);
+double parseDouble (char * str);
+char * spaceClean (char * str);
+int *  subarray (int * a, int low, int high);
+char * substring (char * str, int start, int end);
 
-int max (int * a) {
-	int max = a[0];
-	int i = 0;
-	while (&a[i] != NULL) {
-		if (a[i] > max) {
-			max = a[i];
-		}
-		i = i + 1;
-	}
-	return max;
-}
 
 double average (int * a) {
 	int sum = 0;
@@ -38,6 +29,33 @@ double average (int * a) {
 char charAt (char * str, int index) {
 	if (index > strlen (str)) return '\0';
 	return str[index];
+}
+
+_Bool containStr (char * str, char * tar) {
+	int slen = strlen (str), tlen = strlen (tar);
+	int i = 0, j = 0;
+	for (i = 0; i < slen; i++) {
+		_Bool has = true;
+		for (j = 0; j < tlen; j++) {
+			if (str[i + j] != tar[j]) {
+				has = false;
+				break;
+			}
+		}
+		if (has == true) return true;
+	}
+	return false;
+}
+
+int indexAfter (char * str, char c, int rep) {
+	int i = 0;
+	int pos = 0;
+	while (i < rep) {
+		pos = pos + indexOf (str, c);
+		str = substring (str, pos, strlen (str));
+		i = i + 1;
+	}
+	return pos;
 }
 
 int indexOf (char * str, char c) {
@@ -68,12 +86,36 @@ int indexOfStr (char * str, char * cmp) {
 	return -1;
 }
 
-char * tabClean (char * str) {
+int max (int * a) {
+	int max = a[0];
+	int i = 0;
+	while (&a[i] != NULL) {
+		if (a[i] > max) {
+			max = a[i];
+		}
+		i = i + 1;
+	}
+	return max;
+}
+
+int min (int * a) {
+	int min = a[0];
+	int i = 0;
+	while (&a[i] != NULL) {
+		if (a[i] < min) {
+			min = a[i];
+		}
+		i = i + 1;
+	}
+	return min;
+}
+
+char * spaceClean (char * str) {
 	int len = strlen (str);
 	char * cp = (char *) malloc (sizeof (char) * len);
 	int i = 0, j = 0;
 	for (i = 0; i < len; i++) {
-		if (str[i] != '\t') {
+		if (str[i] != '\t' && str[i] !=' ') {
 			cp[j] = str[i];
 			j = j + 1;
 		} 

@@ -35,6 +35,7 @@ void   parse_entry ();
 _Bool  parse_file (char * argv []);
 void   parse_refs ();
 void   parse_terminate ();
+void   refInfo (Refseq * r);
 //============================================================================//
 
 
@@ -67,9 +68,20 @@ void parse_args (int argc, char * argv []) {
 	}
 }
 
+// FINISH implementing this method!
 void parse_entry () {
-	int i = 0;
 	char * entry = (char *) malloc (sizeof (char) * LINELENGTH);
+	int line = 0;
+	int c;
+
+	char refid [80];
+	while ((c = fgetc (infd)) != EOF) {
+		if (c == '\n') line = line + 1;
+	}
+	printf ("LINE = %d\n", line);
+	//int start = parseInt ()
+	/*int i = 0;
+	
 	int status = fgets (entry, LINELENGTH, infd);
 
 	char * RNAME = (char *) malloc (sizeof (char) * LINELENGTH);
@@ -77,9 +89,9 @@ void parse_entry () {
 
 	for (i = 0; i < count; i++) {
 		while (status != NULL) {
-			status = fgets (entry, LINELENGTH, infd);
+			status = ;
 		}
-	}
+	}*/
 	free (entry);
 }
 
@@ -100,37 +112,37 @@ _Bool parse_file (char * argv []) {
 	return true;
 }
 
-// TODO: Finish implementing this function
+// TODO 01: Console currently print weird characters
 void parse_refs () {
 	seqs = (Refseq *) malloc (128 * sizeof (Refseq));
 	char * line = (char *) malloc (sizeof (char) * LINELENGTH);
-
-	fgets (line, LINELENGTH, infd);
-	char * lncp = tabClean (line);
+	char * lncp = (char *) malloc (sizeof (char) * LINELENGTH);
+	
+	_Bool isref = true;
 
 
 	int i = 0;
-	while (charAt (line, 0) == '@') {
-		printf ("CLEANLINE=%s\n", lncp);
-		if (strcmp (substring (line, 0,3), "@SQ") == 0) {
-			int start = indexOfStr (line, "SN:");
-			int end = indexOfStr (line, "LN:");
-			char * name = substring (line, start+3, end);
-			int len = parseInt (substring (line, end, strlen (line)));
+	while (isref) {
+		fgets (line, LINELENGTH, infd);
+		lncp = spaceClean (line);
+		if (containStr (lncp,"@SQ") == true) {
+			int start = indexOfStr (lncp, "SN:");
+			int end = indexOfStr (lncp, "LN:");
+			char * name = substring (lncp, start+3, end);
+			int len = parseInt (substring (lncp, end, strlen (lncp)));
 
 			(seqs[i]).seqname = (char *) malloc (sizeof (char) * MAXSEQNUM);
 			(seqs[i]).seqname = name;
 			(seqs[i]).seqlen = len;
 			(seqs[i]).sequence = (int *) malloc (sizeof (int) * len);
+			refInfo (&seqs[i]);
 			i = i + 1;
-			printf ("SEQ: %s LEN: %d\n", name, len);
 		}
-		fgets (line, LINELENGTH, infd);
-		lncp = tabClean (line);
-		printf ("CLEANLINE=%s\n", lncp);
+		if (charAt(lncp, 0) != '@') isref = false;
 	}
 
 	free (line);
+	free (lncp);
 }
 
 void parse_terminate () {
@@ -139,9 +151,13 @@ void parse_terminate () {
 	fclose (outfd);
 }
 
+void refInfo (Refseq * r) {
+	printf ("\nref=<%s>\n", r->seqname);
+	printf ("len=<%d>\n", r->seqlen);
+}
+
 /**
- * Command line arguments: <INPUT FILE>, <CONTIG LENGTH>, <STARTING LINE>,
- * <ENDING LINE>, <OUTPUT FILE>
+ * Command line arguments: <INPUT FILE>, <OUTPUT FILE>
  */
 int main (int argc, char * argv []) {
 
