@@ -1,7 +1,7 @@
 import java.io.*;
 import java.util.Scanner;
 
-public class SanParser {
+public class SamParser {
 
     private int left;
     private int right;
@@ -94,7 +94,7 @@ public class SanParser {
     }
 
     public static void main (String [] args) {
-        SanParser sam = new SanParser();
+        SamParser sam = new SamParser();
         sam.parse(args);
     }
 }
