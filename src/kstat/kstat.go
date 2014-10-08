@@ -1,11 +1,11 @@
-package stats
+package kstat
 
-func average (data [] int) float32 {
+func average (data [] int) float64 {
 	sum := data[0]
 	for i:= 1; i < len (data); i++ {
 		sum = sum + data [i]
 	}
-	var mean float32 = sum * 1.0 / len (data)
+	var mean float64 = float64 (sum / len (data))
 	return mean
 }
 
