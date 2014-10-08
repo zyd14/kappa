@@ -4,7 +4,7 @@ import "bufio"
 import "errors"
 import "fmt"
 import "os"
-//import "strconv"
+import "strconv"
 import "strings"
 
 type ref_t struct {
@@ -16,34 +16,83 @@ type sam_t struct {
 	refs [] ref_t
 }
 
-var sam sam_t
-
-//================================ Signatures ================================//
-func ParseArgs () (filein, fileout string, err error);
-func SetRefCount (infile *os.File, sam sam_t) (count int)
-//============================================================================//
-
-/*
-func is_header (line string) bool {
-	return strings.HasPrefix(line, "@")
+type sam_i struct {
+	size [] int
+	name [] string
 }
 
-func is_ref (line string) bool {
-	return strings.HasPrefix(line, "@SQ")
-}
-
-func is_entry (line string) bool {
-	return !strings.HasPrefix(line, "@")
-}*/
+var seqdata sam_t
+var seqinfo sam_i
 
 /**
- * Parse command line arguments
+ * Parse integer from string that starts with an integer
+ */
+func FetchInt (str string) (val int) {
+	size := len (str)
+	var pos int = 0;
+	for i:=0; i < size; i++ {
+		if str[i] > '9' || str[i] < '0' {
+			break
+		} else {
+			pos = pos + 1
+		}
+	}
+	num, err:= strconv.Atoi(str[0: pos])
+	if err != nil {
+		return -1
+	} else {
+		return num
+	}
+}
+
+/**
+ * Parse each matching case of gene
+ */
+func GetGeneInfo (line string) (seqname string, start int, end int) {
+	var pieces [] string = strings.Split(line, "\t")
+	name := pieces [2]
+	seqstart, err := strconv.Atoi(pieces[3])
+	seqend := FetchInt (pieces[5])
+	if err != nil {
+		return "", 0, 0
+	} else {
+		return name, seqstart, int(seqend) + seqstart
+	}
+}
+
+/**
+ * Parse an individual line that contains reference sequence information,
+ * including the name of the refrence sequence and the length
+ */
+func GetRefInfo (line string) (name string, size int, err error) {
+	fmt.Println("Analyzing reference sequence...")
+	namestart := strings.Index(line, "SN:") + 3
+	nameend := strings.Index (line[namestart: len(line)], "\t") + namestart
+	seqname:=line[namestart:nameend]
+
+	// CAUTION: Must make sure that LN:9999 has a tab right after. Otherwise
+	// program will not execute and cause runtime error!
+	sizestart := strings.Index(line, "LN:") + 3
+	sizeend := strings.Index (line[sizestart: len(line)], "\t") + sizestart
+	strval:=line[sizestart:sizeend]
+	seqval, err:= strconv.Atoi(strval)
+	if err != nil {
+		return "", 0, err
+	} else {
+		fmt.Println("Finishing analyzing reference sequence...")
+		return seqname, seqval, nil
+	}
+}
+
+/**
+ * Parse command line arguments and return the path for input and output files
  */
 func ParseArgs () (filein, fileout string, err error) {
+	fmt.Println("Analyzing command line arguments...")
 	argc := len(os.Args)
 
 	if (argc != 3) {
-		return "", "", errors.New ("./samparse [input file] [output file])")
+		return "", "", errors.New ("./samparse [input.sam] [output.csv])")
 	} else {
 
 		if !strings.HasSuffix(os.Args[1], ".sam") {
@@ -61,164 +110,160 @@ func ParseArgs () (filein, fileout string, err error) {
 		if errin != nil { return "", "", errin }
 		if errout != nil { return "", "", errout }
 	}
+	fmt.Println("Finishing analyzing command line arguments...")
 	return os.Args[1], os.Args[2], nil;
 }
 
 /**
- * Read same file and set the number of references
+ * Initialize data structure and return the number of reference scanned
  */
-func SetRefCount (infile *os.File, sam sam_t) (count int) {
-	var c int = 0
-	scnr := bufio.NewScanner(infile)
-	line := scnr.Text()
-	fmt.Println(line)
-	line = scnr.Text()
-	fmt.Println(line)
-	line = scnr.Text()
-	fmt.Println(line)
-	for strings.HasPrefix(line, "@") {
-		fmt.Println(line)
-		if strings.HasPrefix(line, "@SQ") {
-			c = c + 1
-		}
-		scnr.Text()
-	}
-	return c
-}
-/*
-func parse_ref (sam sam_t, line string) (name string, size int) {
-	fmt.Println("Analyzing reference sequence...")
-	seqnamestart := strings.Index(line, "SN:") + 3
-	seqnameend := strings.Index (line[seqnamestart: len(line)], "\t") + seqnamestart
-	n:=line[seqnamestart:seqnameend]
-	fmt.Println(n)
-	sam.refs[2].name = n
-	fmt.Println("Finishing analyzing reference sequence...")
-	return n, 5
-}
-
-func parse_entry (sam sam_t, line string) {
-}
-
-func populate (seq [] int, start int, end int) {
-	for i:= start - 1; i <= end - 1; i++ {
-		seq[i] = seq[i] + 1
-	}
-}
-
-func sam_init (scanner *bufio.Scanner, sam sam_t) {
+func SamInit (filein string, samdata * sam_t, saminfo * sam_i) (err error) {
 	fmt.Println("Initializing data structures...")
-	var size int = GetRefCount (scanner, sam)
-	fmt.Println(size)
-	refcounter := scanner
-	var count int = 0
-	for refcounter.Scan () {
-		line := refcounter.Text ()
-		if ! is_header (line) {
-			break;
-		}
-		if is_ref (line) {
-			count = count + 1
-		}
-	}
-	sam.refs = make ([] ref_t, count)
+	samdata.refs = make ([] ref_t, 0)
+	saminfo.size = make ([] int, 0)
+	saminfo.name = make ([] string, 0)
+	file, errin := os.Open (filein)
 
-	var refsizes [] int = make ([] int, count)
-	var i int = 0
-	sizecounter := scanner
-	for sizecounter.Scan () {
-		line := sizecounter.Text ()
-		if ! is_header (line) {
-			break;
-		}
-		if is_ref (line) {
-			seqsizestart := strings.Index(line, "LN:") + 3
-			seqsizeend := strings.Index (line[seqsizestart: len(line)], "\t") + seqsizestart
-			name:=line[seqsizestart:seqsizeend]
-			num, err := strconv.Atoi(name)
-			if err == nil {
-				refsizes[i] = num
-				i = i + 1
+	// If file cannot be open, then return error with 0 reference sequence
+	if errin != nil {
+		file.Close()
+		fmt.Println("I/O error occured. Aborting action...")
+		return errin
+	} else {
+		c := 0
+		scnr := bufio.NewScanner(file)
+		line := ""
+
+		// This for loop can be inefficient when input is large. A potential
+		// bottleneck for this program
+		for scnr.Scan() {
+			if strings.HasPrefix(line, "@SQ") {
+				c = c + 1
+				name, size, err := GetRefInfo (line)
+				if (err == nil) {
+					saminfo.size = append (saminfo.size, size)
+					saminfo.name = append (saminfo.name, name)
+				}
 			}
+			line = scnr.Text()
 		}
-	}
+		file.Close()
 
-	for i:=0; i < count; i++ {
-		sam.refs[i].seq = make ([] int, refsizes[i])
+		for i:= 0; i < len(saminfo.size); i++ {
+			ref := ref_t {name: saminfo.name[i], seq: make ([] int, saminfo.size[i])}
+			samdata.refs = append(samdata.refs, ref)
+		}
+
+		fmt.Println("Finishing initialzing data structures...")
+		return nil
 	}
-	fmt.Println("Finishing initializing data structures...")
 }
 
-func sam_scan (scanner *bufio.Scanner, sam sam_t) {
-	fmt.Println("Scanning sam file...")
-	for scanner.Scan () {
-		line := scanner.Text ()
-		if line == "." {
+/**
+ * Parse gene information
+ */
+func SamParse (filein string, samdata * sam_t, saminfo * sam_i) (err error) {
+	fmt.Println ("Parsing data...")
+
+	file, errin := os.Open (filein)
+
+	// If file cannot be open, then return error with 0 reference sequence
+	if errin != nil {
+		file.Close()
+		fmt.Println("I/O error occured. Aborting action...")
+		return errin
+	} else {
+		
+		scnr := bufio.NewScanner(file)
+		line := scnr.Text()
+		// This for loop can be inefficient when input is large. A potential
+		// bottleneck for this program
+		for scnr.Scan() {
+			if !strings.HasPrefix(line, "@") && len(line) > 10{
+				name, start, end := GetGeneInfo (line)
+				if end > start {
+					Populate (samdata, saminfo, name, start, end)
+				}
+			}
+			line = scnr.Text()
+		}
+		file.Close()
+	}
+	fmt.Println ("Finishing parsing data...")
+	return nil
+}
+
+/**
+ * Add base pair count to each position
+ */
+func Populate (samdata * sam_t, saminfo * sam_i, name string, start int, end int) (err error) {
+
+	if (start >= end) {
+		return errors.New ("Invalid gene position: start=" + strconv.Itoa(start) + " and end=" + strconv.Itoa(end))
+	}
+
+	var pos int = -1
+	for i:= 0; i < len(saminfo.name); i++ {
+		if (strings.EqualFold(name, saminfo.name[i])) {
+			pos = i
 			break
-		} else {
-			if is_ref(line) {
-				parse_ref (sam, line)
-			} else if is_entry (line) {
-				parse_entry (sam, line)
+		}
+	}
+
+	// If reference gene is not found, return right away. Future improvement should
+	// consider adding corresponding message
+	if pos == -1 {
+		return errors.New ("Reference not found " + name)
+	}
+
+	for i:=start; i < end; i++ {
+		samdata.refs[pos].seq[i] = samdata.refs[pos].seq[i] + 1
+	}
+	return nil
+}
+
+/**
+ * Write data to specified output file
+ */
+func SamGenOutput (fileout string, samdata sam_t, saminfo sam_i) (err error) {
+	fmt.Println("Generating output data...")
+	fout, eout := os.Create (fileout)
+	if eout != nil {
+		return errors.New("Cannot create file: " + fileout + "\nAction aborted")
+	} else {
+		writer := bufio.NewWriter(fout)
+		for i:= 0; i < len(saminfo.name); i++ {
+			writer.WriteString (saminfo.name[i] + "\n")
+			for j:= 0; j < saminfo.size[i]; j++ {
+				index := strconv.Itoa(j + 1)
+				val := strconv.Itoa(samdata.refs[i].seq[j])
+				writer.WriteString (index + "," + val + "\n")
 			}
 		}
+		fmt.Println("Finishing generating output data...")
+		return nil
 	}
-	fmt.Println("Finishing scanning sam file...")
 }
 
-func sam_write (writer *bufio.Writer, sam sam_t) {
-	fmt.Println("Generating data file...")
-	for i := 0; i < len (sam.refs); i++ {
-		writer.WriteString(sam.refs[i].name)
-		writer.WriteString(",")
-	}
-	writer.Flush()
-	for i := 0; i < len (sam.refs); i++ {
-		for j := 0; j < len(sam.refs[i].seq); j++ {
-			val := strconv.Itoa(sam.refs[i].seq[j])
-			writer.WriteString(val)
-			writer.WriteString(",")
-		}
-		writer.Flush()
-	}
-	fmt.Println("Finishing generating data file...")
-}*/
-
-func WriteOutput (outfile *os.File, sam sam_t) {
-
-}
-
+/**
+ * The main function of samparse
+ */
 func main () {
 	inpath, outpath, err := ParseArgs ()
 	if (err != nil) {
 		fmt.Println(err)
 		return
 	}
-		
-	fin, errin := os.Open (inpath)
-	fout, errout := os.Create (outpath)
 
-	if errin != nil || errout != nil {
-		fmt.Println(errin)
-		fmt.Println(errout)
+	err = SamInit (inpath, &seqdata, &seqinfo)
+	if err != nil {
+		fmt.Println("File cannot open")
 		return
+	} else {
+		fmt.Println("References:", len(seqdata.refs))
 	}
 
-	var ref int = SetRefCount (fin, sam)
-	fmt.Println("Total Reference:", ref)
-	WriteOutput(fout, sam)
-	
-/*
-	filein, errin := os.Open (os.Args[1])
-	fileout, errout := os.Create (os.Args[2])
-	
-	if errin == nil && errout == nil {
-		scanner := bufio.NewScanner(filein)
-		writer := bufio.NewWriter (fileout)
-		sam_init (filein, sam)
-		sam_scan (filein, sam)
-		sam_write (fileout, sam)
-	} else {
-		fmt.Println("I/O error. Please try later.")
-	}	*/
+	err = SamParse(inpath, &seqdata, &seqinfo)
+
+	SamGenOutput (outpath, seqdata, seqinfo)
 }
