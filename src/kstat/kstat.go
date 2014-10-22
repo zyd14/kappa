@@ -1,17 +1,32 @@
 package kstat
 
-func average (data [] int) float64 {
+func Echo (msg string) string {
+	return msg
+}
+
+func GetMax (a, b float64) float64 {
+	if a >= b {
+		return a
+	} else {
+		return b
+	}
+}
+
+func Average (data []float64) float64 {
+	if len (data) <= 0 {
+		return float64(0)
+	}
 	sum := data[0]
 	for i:= 1; i < len (data); i++ {
 		sum = sum + data [i]
 	}
-	var mean float64 = float64 (sum / len (data))
+	var mean float64 = sum / float64 (len (data))
 	return mean
 }
 
-func max (data [] int) int {
+func Max (data []float64) float64 {
 	if len (data) == 0 {
-		return 0
+		return float64(0)
 	} else {
 		max := data[0]
 		for i:= 1; i < len (data); i++ {
@@ -23,9 +38,9 @@ func max (data [] int) int {
 	}
 }
 
-func min (data [] int) int {
+func Min (data []float64) float64 {
 	if len (data) == 0 {
-		return 0
+		return float64(0)
 	} else {
 		min := data[0]
 		for i:= 1; i < len (data); i++ {

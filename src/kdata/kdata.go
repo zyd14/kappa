@@ -1,4 +1,14 @@
 package kdata
+
+type SamRef struct {
+	gname string
+	gsize int
+}
+
+type SamEntry struct {
+	
+}
+
 /*
 import "errors"
 import "os"
