@@ -3,6 +3,58 @@ package kparser
 import "fmt"
 import "os"
 import "strings"
+import "kdata"
+
+const EQUAL = '='
+const DECIMAL = '.'
+const ADD = '+'
+const SUB = '-'
+const MUL = '*'
+const DIV = '/'
+const LFP = '('
+const RFP = ')'
+const POW = '^'
+const ISNUM = 0
+const ISSTR = 1
+const ISOPR = 2
+const ISKEY = 3
+const ISERR = -1
+
+type Parser struct {
+    check Stack
+    char Stack
+    number Stack
+    operator Stack
+    strings Stack
+    variable Stack
+    status int
+}
+
+var kparser Parser = new (Parser)
+
+func CharType (char byte) int {
+    if char <= '9' && char >= '0' || char == DECIMAL{
+        return ISNUM
+    } else if char == ADD || char == SUB || char == MUL || char == DIV || char == POW {
+        return ISOPR
+    } else {
+        return ISERR
+    }
+}
+
+func (p *Parser) Dissolve (input string) bool {
+    for i := 0; i < len(input); i++ {
+        if CharType (input[i]) == ISNUM {
+            p.status = ISNUM
+            p.check 
+        }
+    }
+}
+
+func Parse(input string) bool {
+
+    return true
+}
 
 /**
  * Parse inputs
