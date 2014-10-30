@@ -61,8 +61,14 @@ public class JPauda {
             try {
                 Scanner scnr = new Scanner (fdin);
                 PrintWriter pw = new PrintWriter (fdout);
+                System.out.println("Processing " + args[0]);
+                int lc = 0;
                 while (scnr.hasNextLine()) {
                     line = scnr.nextLine();
+                    lc++;
+                    if (lc % 100000 == 0) {
+                        System.out.println("\t" + lc + " line processed.");
+                    }
                     if (isQuery(line)) {
                         currQuery = getQuery(line);
                     }
