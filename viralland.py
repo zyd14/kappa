@@ -3,6 +3,10 @@
 
 # Configuration class: user can configure commands and file path easily in
 # Python console or use a configuration file
+import os
+
+
+
 class VLConfig:
     def __init__(self, title):
         self.title = str(title)
@@ -73,3 +77,51 @@ class VLRun:
         print ("In development")
     def yparse (self):
         print ("In development")
+
+
+class VelvetPack:
+    def __init__(self):
+        self.fasta = []
+        self.fastq = []
+    def addfasta(self, path):
+        self.fasta.append(str(path))
+
+class EmbossPack:
+    def __init__(self):
+        self.fasta = []
+        self.fastq = []
+
+class FaaPack:
+    def __init__(self):
+        self.fasta = []
+
+class PaudaPack:
+    def __init__(self):
+        self.fasta = []
+        self.fastq = []
+        self.out = ""
+
+class ParsePack:
+    def __init__(self):
+        self.inputs = []
+        self.outputs = []
+
+class KaronaPack:
+    def __init__(self):
+        self.output = []
+
+class VisualPack:
+    def __init__(self):
+        self.paths = []
+        self.cmd = ""
+    def setplotcmd (self, instr):
+        self.cmd = str(instr)
+    def addfile (self, path):
+        self.paths.append(path)
+    def plot(self, item):
+        exe = self.cmd + " " + item
+        os.system(exe)
+    def plotall(self):
+        for item in self.paths:
+            exe = self.cmd + " " + item
+            os.system(exe)
