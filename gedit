@@ -1,0 +1,11 @@
+*.class
+*.a
+*.out
+*.o
+*.
+*.txt
+*.csv
+*.dat
+*.pyc
+bin/
+__pycache__/
