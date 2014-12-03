@@ -1,0 +1,12 @@
+bin/
+pkg/
+*.a
+*.class
+*.o
+*.out
+*.
+*.txt
+*.csv
+*.dat
+*.pyc
+__pycache__/
