@@ -100,9 +100,9 @@ class VelvetPack:
 # cand mathc user's system setting
 # TODO: finish this class
 class EmbossPack:
-    def __init__(self):
-        self.fasta = []
-        self.fastq = []
+    #Josh
+    def __init__(self, inDirectory):
+        self.inFiles = inDirectory
 
 # Class of managing FAA file: instantiate this class so that command of FAA
 # cand mathc user's system setting
@@ -119,6 +119,7 @@ class FaaPack:
 # TODO: finish this class. Should be expandable to bowtie if needed. Bowtie
 # might be more well-known by people than Pauda
 class PaudaPack:
+    #YB
     def __init__(self):
         self.fasta = []
         self.fastq = []
@@ -129,6 +130,7 @@ class PaudaPack:
 # TODO: finish this class. Also, parser must follow the same format!
 # Parser must be like this: $ ./parser [input file] [output file]
 class ParsePack:
+    #YB
     def __init__(self, name):
         """
             ParsePack(name) set a parser for files with a job name
@@ -159,6 +161,7 @@ class ParsePack:
 # can match user's system setting
 # TODO: finish this class
 class KaronaPack:
+    #Jon
     def __init__(self):
         self.output = []
 
@@ -166,6 +169,10 @@ class KaronaPack:
 # visualization can match user's system setting
 # TODO: finish this class
 class VisualPack:
+    #Need to get GBKs from user
+    #Have user provide GBK directory
+    #Use .glob to get all the GBKs
+    #Write out to a file, send file to Jons program as argument
     def __init__(self):
         self.paths = []
         self.cmd = None
