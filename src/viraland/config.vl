@@ -1,0 +1,19 @@
+[TITLE] run01
+[LOG] y
+[KEEP] y
+[VELVET-INPUT] /path/to/directory
+[VELVET-COMMAND] velveth, velvetg
+[VELVET-OUTPUT] /path/to/directory
+[EMBOSS-INPUT]
+[EMBOSS-COMMAND]
+[EMBOSS-OUTPUT] /path/to/directory
+[PAUDA-INPUT] /path/to/directory
+[PAUDA-COMMAND]
+[PAUDA-OUTPUT] /path/to/directory
+[PARSE-BLASTH-INPUT] /path/to/directory
+[PARSE-BLASTH-OUTPUT] /path/to/directory
+[PARSE-PUTONTI-INPUT] /path/to/directory
+[PARSE-PUTONTI-OUTPUT] /path/to/directory
+[VISUAL-INPUT] /path/to/directory
+[VISUAL-OUTPUT] /path/to/directory
+[STOP]
